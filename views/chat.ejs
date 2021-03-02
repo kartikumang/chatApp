@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Socket !</title>
+  <link rel="stylesheet" href="../stylesheets/chat.css">
+
+</head>
+<body>
+  <div class="back">
+    <img src="../images/images.png" alt="">
+    <div class="container">
+
+    </div>
+    <form action="" id="send-container">
+      <input type="text" name="messageInp" id="messageInp" placeholder="Type a message.....">
+    </form>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.5/socket.io.min.js" integrity="sha512-L9L4VhE0D58fCxtJiYDHbIzSVfNGY24rhQPWTZPschTVKLpucPsLeT0FSjfnylLYARalTQqgwXsjjhi+wUTwIw==" crossorigin="anonymous"></script>
+
+  <script>
+     var socket = io();
+     var form = document.querySelector('#send-container');
+     var messageInp = document.querySelector('#messageInp');
+     var messageContainer = document.querySelector('.container');
+     
+     form.addEventListener('submit',function(e){
+       e.preventDefault();
+       var message = messageInp.value;
+       append(`You : ${message}`, 'right');
+       socket.emit('send',message);
+       messageInp.value = '';
+     });
+
+
+     var append = function(message,position){
+         var messageElement = document.createElement('div');
+         messageElement.innerText = message;
+         messageElement.classList.add('message');
+         messageElement.classList.add(position);
+         messageContainer.append(messageElement);
+    }
+
+
+     var userparam = new URL(window.location.href);
+     userparam = userparam.searchParams.get("username");
+     var name = userparam;
+     
+     socket.emit('new-user-joined',name);
+
+     socket.on('user-joined',function(name){
+       append(`${name} : joined the chat !`,'right');
+     });
+
+     socket.on('receive',function(data){
+        append(`${data.name} : ${data.message}`,'left');
+     });
+     socket.on('leave',function(name){
+               append(`${name} : left the chat !`,'left');
+          });
+          
+  </script>
+</body>
+</html>
